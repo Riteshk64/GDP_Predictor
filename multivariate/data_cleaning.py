@@ -2,21 +2,16 @@ import pandas as pd
 
 file_names = [
     "current_account_balance.xlsx",
-    "exchange_rates.xlsx",
     "exports.xlsx",
     "gdp.xlsx",
-    "gov_spending.xlsx",
     "household_consumption.xlsx",
     "imports.xlsx",
     "industrial_production_proxy.xlsx",
     "inflation.xlsx",
-    "interest_rates.xlsx",
     "investment.xlsx",
-    "money_supply.xlsx",
-    "unemp.xlsx"
 ]
 
-years = [str(y) for y in range(1991, 2022)]
+years = [str(y) for y in range(1991, 2025)]
 
 merged_df = None
 

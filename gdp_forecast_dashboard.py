@@ -4,15 +4,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # -------------------- Import Model Functions --------------------
-from univariate.models.linear_model import linear_forecast
-from univariate.models.moving_average_model import moving_average_forecast
-from univariate.models.exponential_smoothing_model import exponential_smoothing_forecast
-from univariate.models.arima_model import arima_forecast
-from multivariate.models.prophet_univariate_model import prophet_univariate_forecast
+from univariate.models.linear_regression import linear_regression
+from univariate.models.moving_average import moving_average
+from univariate.models.exponential_smoothing import exponential_smoothing
+from univariate.models.arima import arima
+from multivariate.models.prophet_univariate import prophet_univariate
 
-from multivariate.models.arimax_model import arimax_forecast
-from multivariate.models.var_model import var_forecast
-from multivariate.models.prophet_multivariate_model import prophet_multivariate_forecast
+from multivariate.models.arimax import arimax
+from multivariate.models.var import var
+from multivariate.models.prophet_multivariate import prophet_multivariate
 
 from prophet.plot import add_changepoints_to_plot
 from prophet import Prophet
@@ -36,23 +36,15 @@ else:
     ])
 
 # -------------------- Load Data --------------------
-if model_type == "Univariate":
-    df = pd.read_csv("univariate/data/India_GDP_Data.csv")
-    df = df.sort_values("Year").reset_index(drop=True)
-    years = np.array(df["Year"]).reshape(-1, 1)
-    gdp = np.array(df["GDP_In_Billion_USD"])
-    forecast_years = np.arange(2022, 2031)
+df = pd.read_csv("multivariate/data/processed/gdp_factor_india.csv")
+df = df[df['Year'].between(1991, 2025)].reset_index(drop=True)
 
-else:
-    df = pd.read_csv("multivariate/data/processed/gdp_factor_india.csv")
-    df = df[(df['Year'] >= 1991) & (df['Year'] <= 2022)].reset_index(drop=True)
-    df = df.apply(pd.to_numeric, errors='coerce').dropna()
-    df.set_index("Year", inplace=True)
-    df.index = pd.to_datetime(df.index, format="%Y")
-    df = df.asfreq("YS")
-    gdp = df["GDP (current US$)"]
-    exog = df.drop(columns=["GDP (current US$)"])
-    forecast_years = pd.date_range(start="2022", periods=9, freq="YS")
+# for univariate models
+df_univariate = df[['Year', 'GDP (current US$)']].copy()
+df_univariate = df_univariate.dropna().reset_index(drop=True)
+years = np.array(df_univariate["Year"]).reshape(-1, 1)
+gdp = np.array(df_univariate["GDP (current US$)"])
+forecast_years = np.arange(2025, 2031)
 
 # -------------------- Forecast Logic --------------------
 forecast = None
@@ -61,19 +53,19 @@ fig = None
 # ---------- Univariate Models ----------
 if model_type == "Univariate":
     if model_choice == "Linear":
-        forecast = linear_forecast(years, gdp, forecast_years)
+        forecast = linear_regression(years, gdp, forecast_years)
 
     elif model_choice == "Moving Average":
-        forecast = moving_average_forecast(gdp, forecast_years)
+        forecast = moving_average(gdp, forecast_years)
 
     elif model_choice == "Exponential Smoothing":
-        forecast = exponential_smoothing_forecast(gdp, forecast_years)
+        forecast = exponential_smoothing(gdp, forecast_years)
 
     elif model_choice == "ARIMA":
-        forecast = arima_forecast(gdp, forecast_years)
+        forecast = arima(gdp, forecast_years)
 
     elif model_choice == "Prophet":
-        forecast = prophet_univariate_forecast("univariate/data/India_GDP_Data.csv", n_years=9)
+        forecast = prophet_univariate("multivariate/data/univariate_gdp.csv", n_years=6)
 
         # Optional Prophet plot
         df_prophet = df.rename(columns={"Year": "ds", "GDP_In_Billion_USD": "y"})
@@ -87,7 +79,7 @@ if model_type == "Univariate":
             n_changepoints=10
         )
         model.fit(df_prophet)
-        future = model.make_future_dataframe(periods=9, freq="Y")
+        future = model.make_future_dataframe(periods=6, freq="Y")
         forecast_df = model.predict(future)
 
         fig = model.plot(forecast_df)
@@ -99,13 +91,13 @@ if model_type == "Univariate":
 # ---------- Multivariate Models ----------
 elif model_type == "Multivariate":
     if model_choice == "ARIMAX":
-        forecast = arimax_forecast(gdp, exog, forecast_years)
+        forecast = arimax(gdp, exog, forecast_years)
 
     elif model_choice == "VAR":
-        forecast = var_forecast(df, forecast_years)
+        forecast = var(df, forecast_years)
 
     elif model_choice == "Prophet (Multivariate)":
-        forecast = prophet_multivariate_forecast("multivariate/data/processed/gdp_factor_india.csv", forecast_periods=9)
+        forecast = prophet_multivariate("multivariate/data/processed/gdp_factor_india.csv", forecast_periods=6)
 
         # Optional Prophet plot
         df_mv = pd.read_csv("multivariate/data/processed/gdp_factor_india.csv")
@@ -124,9 +116,9 @@ elif model_type == "Multivariate":
             model.add_regressor(reg)
 
         model.fit(df_mv[['ds', 'y'] + regressor_cols])
-        future = model.make_future_dataframe(periods=9, freq="Y")
+        future = model.make_future_dataframe(periods=6, freq="Y")
         for reg in regressor_cols:
-            future[reg] = pd.concat([df_mv[reg], pd.Series([df_mv[reg].iloc[-1]] * 9)], ignore_index=True)
+            future[reg] = pd.concat([df_mv[reg], pd.Series([df_mv[reg].iloc[-1]] * 6)], ignore_index=True)
 
         forecast_df = model.predict(future)
 
