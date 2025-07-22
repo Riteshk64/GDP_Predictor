@@ -1,20 +1,14 @@
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 def exponential_smoothing(gdp, forecast_years):
-    configs = [
-        ('add', None),
-        ('mul', None),
-        (None, None),
-    ]
-
+    trends = ['add','mul',None]
     best_aic = float('inf')
     best_model = None
 
-    for trend, seasonal in configs:
+    for trend in trends:
         try:
-            model = ExponentialSmoothing(gdp, trend=trend, seasonal=seasonal)
+            model = ExponentialSmoothing(gdp, trend=trend, seasonal=None)
             fitted = model.fit()
-
             if fitted.aic < best_aic:
                 best_aic = fitted.aic
                 best_model = fitted
