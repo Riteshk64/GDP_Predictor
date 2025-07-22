@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import warnings
-warnings.filterwarnings('ignore')
+from statsmodels.tools.sm_exceptions import ConvergenceWarning
+warnings.simplefilter("ignore", ConvergenceWarning)
 
 from models.arimax import arimax
 from models.var import var
@@ -19,7 +20,7 @@ df = df.asfreq('YS')
 gdp = df['GDP (current US$)']
 exog = df.drop(columns=['GDP (current US$)'])
 
-n_forecast = 9
+n_forecast = 6
 forecast_years = pd.date_range(start='2025', periods=n_forecast, freq='YS')
 
 all_forecasts = {}
