@@ -1,8 +1,7 @@
 import numpy as np
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.stattools import adfuller
-from sklearn.metrics import mean_squared_error
-from multivariate.models.exog_forecast_model import forecast_exog_arima
+from .exog_forecast_model import forecast_exog_arima
 
 def determine_d(series, max_diff=2):
     for d in range(max_diff + 1):
