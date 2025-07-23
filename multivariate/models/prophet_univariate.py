@@ -10,9 +10,6 @@ def prophet_univariate(csv_path, n_years=6):
         drop_cols = ['Per_Capita_in_USD', 'Percentage_Growth']
         df = df.drop(columns=[col for col in drop_cols if col in df.columns], errors='ignore')
 
-        # Rename columns for Prophet: 
-        # Prophet expects 'ds' for date/time and 'y' for the target variable
-        # Assuming 'Year' column contains the year and 'GDP (current US$)' is target
         df = df.rename(columns={
             'Year': 'ds',
             'GDP (current US$)': 'y'

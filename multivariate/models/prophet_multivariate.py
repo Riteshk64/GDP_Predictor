@@ -67,7 +67,7 @@ def prophet_multivariate(df_path, forecast_periods=6):
 
     # Concatenate historical + forecast regressors
     full_regressor_df = pd.concat([historical_regressors, exog_forecast], ignore_index=True)
-    full_regressor_df.index = future.index  # Align index with Prophet's future df
+    full_regressor_df.index = future.index
 
     # Add to future dataframe
     for reg in regressor_cols:

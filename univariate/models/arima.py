@@ -1,6 +1,6 @@
 from statsmodels.tsa.arima.model import ARIMA
 
-def arima(gdp, forecast_years, validation_split=0.8):
+def arima(gdp, forecast_years):
     d = 3
     best_aic = float('inf')
     best_order = None

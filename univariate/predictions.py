@@ -1,10 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from statsmodels.tsa.arima.model import ARIMA
-from statsmodels.tsa.holtwinters import ExponentialSmoothing
-from statsmodels.tsa.stattools import adfuller
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
 import warnings
 
@@ -17,7 +13,6 @@ warnings.filterwarnings('ignore')
 
 # Load the comprehensive dataset
 def load_and_prepare_data():
-    """Load and prepare GDP data from the factors dataset"""
     df = pd.read_csv('multivariate/data/processed/gdp_factor_india.csv')
     df = df.sort_values('Year').reset_index(drop=True)
 
@@ -28,7 +23,6 @@ def load_and_prepare_data():
 
 # Model evaluation metrics
 def calculate_metrics(actual, predicted):
-    """Calculate comprehensive evaluation metrics"""
     mae = mean_absolute_error(actual, predicted)
     rmse = np.sqrt(mean_squared_error(actual, predicted))
     mape = mean_absolute_percentage_error(actual, predicted)
@@ -37,8 +31,6 @@ def calculate_metrics(actual, predicted):
 
 # Main forecasting function
 def main_forecast():
-    """Main function to run all improved models"""
-    
     # Load data
     years, gdp = load_and_prepare_data()
     forecast_years = np.array([2025, 2026, 2027, 2028, 2029, 2030])
@@ -60,14 +52,6 @@ def main_forecast():
     
     # Moving Average
     all_forecasts['Moving Average'] = moving_average(years, gdp, forecast_years)
-    
-    comparison_df = pd.DataFrame({
-        'Year': forecast_years,
-        'ARIMA': [f'${x:.0f}B' for x in all_forecasts['ARIMA']],
-        'Exp Smoothing': [f'${x:.0f}B' for x in all_forecasts['Exponential Smoothing']],
-        'Linear Reg': [f'${x:.0f}B' for x in all_forecasts['Linear Regression']],
-        'Moving Avg': [f'${x:.0f}B' for x in all_forecasts['Moving Average']]
-    })
     
     ensemble_forecast = np.mean([all_forecasts[model] for model in all_forecasts.keys()], axis=0)
     all_forecasts['Ensemble'] = ensemble_forecast
